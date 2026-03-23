@@ -1,63 +1,10 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 
-// ── Reveal wrapper ────────────────────────────────────────────────────────────
-function Reveal({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
+function HeroSection() {
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: '-80px' });
-  return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 40 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.9, ease: [0.25, 0.46, 0.45, 0.94], delay }}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-// ── Atmospheric background orbs ───────────────────────────────────────────────
-function AtmosphericBg() {
-  return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden>
-      {/* deep pink orb */}
-      <div
-        className="orb w-96 h-96 top-10 left-[-10%]"
-        style={{ background: 'rgba(247,168,184,0.12)' }}
-      />
-      {/* peach orb */}
-      <div
-        className="orb w-[28rem] h-[28rem] top-[-8%] right-[-8%]"
-        style={{ background: 'rgba(255,203,164,0.09)' }}
-      />
-      {/* lilac orb mid */}
-      <div
-        className="orb w-80 h-80 top-[45%] left-[55%]"
-        style={{ background: 'rgba(201,184,247,0.10)' }}
-      />
-      {/* blue orb bottom */}
-      <div
-        className="orb w-72 h-72 bottom-[10%] left-[20%]"
-        style={{ background: 'rgba(168,200,247,0.08)' }}
-      />
-      {/* subtle noise overlay */}
-      <div
-        className="absolute inset-0 opacity-[0.025]"
-        style={{
-          backgroundImage:
-            'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\'/%3E%3C/svg%3E")',
-        }}
-      />
-    </div>
-  );
-}
-
-// ── Hero ──────────────────────────────────────────────────────────────────────
-function Hero() {
-  const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
   const y = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
   const opacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
@@ -65,292 +12,280 @@ function Hero() {
   return (
     <section
       ref={ref}
-      className="relative h-screen flex flex-col items-center justify-center text-center px-6 overflow-hidden"
+      className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
     >
-      {/* blurred backdrop image via gradient */}
-      <motion.div
-        style={{ y }}
-        className="absolute inset-0"
-      >
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              'radial-gradient(ellipse 80% 60% at 50% 30%, rgba(201,184,247,0.15) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 30% 70%, rgba(247,168,184,0.12) 0%, transparent 70%)',
-          }}
-        />
-      </motion.div>
+      {/* Background orbs */}
+      <div className="orb w-[600px] h-[600px] bg-purple-600 top-[-100px] left-[-200px]" />
+      <div className="orb w-[400px] h-[400px] bg-pink-400 bottom-[-50px] right-[-100px]" />
+      <div className="orb w-[300px] h-[300px] bg-blue-500 top-[40%] left-[60%]" />
 
-      <motion.div style={{ opacity }} className="relative z-10 flex flex-col items-center gap-6">
-        {/* eyebrow */}
+      {/* Parallax content */}
+      <motion.div style={{ y, opacity }} className="relative z-10 text-center px-6">
         <motion.p
-          initial={{ opacity: 0, letterSpacing: '0.4em' }}
-          animate={{ opacity: 0.4, letterSpacing: '0.6em' }}
-          transition={{ duration: 1.4, ease: 'easeOut', delay: 0.2 }}
-          className="text-xs font-light tracking-[0.6em] uppercase text-white/40"
+          initial={{ opacity: 0, letterSpacing: '0.5em' }}
+          animate={{ opacity: 0.4, letterSpacing: '0.35em' }}
+          transition={{ duration: 1.8, ease: 'easeOut' }}
+          className="text-xs uppercase tracking-[0.35em] text-purple-300 mb-6 font-sans"
         >
-          A Moment in Stillness
+          an experience
         </motion.p>
-
-        {/* main headline */}
         <motion.h1
-          initial={{ opacity: 0, y: 30, scale: 0.96 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 1.2, ease: [0.25, 0.46, 0.45, 0.94], delay: 0.5 }}
-          className="text-[clamp(4rem,12vw,11rem)] font-bold leading-none"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.4, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          className="text-[clamp(4rem,14vw,11rem)] font-serif font-bold leading-none tracking-tight"
           style={{
-            fontFamily: "'Playfair Display', Georgia, serif",
-            background: 'linear-gradient(135deg, #ffffff 0%, rgba(201,184,247,0.9) 40%, rgba(247,168,184,0.8) 80%, rgba(255,203,164,0.7) 100%)',
+            background: 'linear-gradient(135deg, #ffffff 0%, #c4b5fd 50%, #f9a8d4 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            textShadow: 'none',
           }}
         >
-          Silent Mode
+          Silent
+          <br />
+          Mode
         </motion.h1>
-
-        {/* subtitle */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.5 }}
-          transition={{ duration: 1.2, delay: 1.0 }}
-          className="text-sm font-light tracking-widest text-white/50 italic"
-          style={{ fontFamily: "'Playfair Display', serif" }}
-        >
-          for everything left unsaid
-        </motion.p>
-
-        {/* scroll hint */}
         <motion.div
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 0.3, y: 0 }}
-          transition={{ duration: 1, delay: 1.8 }}
-          className="mt-16 flex flex-col items-center gap-2"
+          initial={{ scaleX: 0, opacity: 0 }}
+          animate={{ scaleX: 1, opacity: 0.3 }}
+          transition={{ duration: 1.2, delay: 1, ease: [0.16, 1, 0.3, 1] }}
+          className="h-px bg-gradient-to-r from-transparent via-purple-300 to-transparent mt-8 w-64 mx-auto"
+        />
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 0.45, y: 0 }}
+          transition={{ duration: 1.2, delay: 1.3, ease: 'easeOut' }}
+          className="mt-6 text-sm text-purple-200 font-sans tracking-widest uppercase"
         >
-          <div className="w-px h-12 bg-gradient-to-b from-white/0 via-white/40 to-white/0" />
-          <p className="text-[10px] tracking-[0.3em] uppercase text-white/30">scroll</p>
+          scroll to feel
+        </motion.p>
+      </motion.div>
+
+      {/* Scroll chevron */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.4 }}
+        transition={{ delay: 2.2, duration: 1 }}
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10"
+      >
+        <motion.div
+          animate={{ y: [0, 8, 0] }}
+          transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+          className="w-6 h-10 rounded-full border border-purple-300/40 flex items-start justify-center pt-2"
+        >
+          <div className="w-1 h-2 bg-purple-300 rounded-full" />
         </motion.div>
       </motion.div>
     </section>
   );
 }
 
-// ── Counter ───────────────────────────────────────────────────────────────────
-function Counter() {
+function CounterSection() {
   const [count, setCount] = useState(0);
-  const [ripple, setRipple] = useState(false);
+  const [glowing, setGlowing] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: '-100px' });
 
-  const handleClick = () => {
+  const handleClick = useCallback(() => {
     setCount((c) => c + 1);
-    setRipple(true);
-    setTimeout(() => setRipple(false), 700);
-  };
+    setGlowing(false);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => setGlowing(true));
+    });
+    setTimeout(() => setGlowing(false), 750);
+  }, []);
 
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center px-6 py-32 gap-10">
-      <Reveal>
-        <p className="text-xs tracking-[0.5em] uppercase text-white/30 text-center">carry the weight</p>
-      </Reveal>
+    <section
+      ref={ref}
+      className="relative min-h-screen flex flex-col items-center justify-center px-6 py-32"
+    >
+      <div className="orb w-[500px] h-[500px] bg-indigo-600 top-[20%] left-[10%]" />
+      <div className="orb w-[350px] h-[350px] bg-rose-400 bottom-[10%] right-[5%]" />
 
-      {/* count display */}
-      <Reveal delay={0.1}>
-        <div className="text-center">
-          <motion.span
-            key={count}
-            initial={{ opacity: 0, y: -16, scale: 0.85 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-            className="block text-[clamp(5rem,18vw,14rem)] font-bold leading-none"
+      <motion.div
+        initial={{ opacity: 0, y: 60 }}
+        animate={inView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+        className="relative z-10 flex flex-col items-center gap-10"
+      >
+        {/* Counter display */}
+        <motion.div
+          key={count}
+          initial={{ scale: 0.85, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="text-center"
+        >
+          <p className="text-[clamp(5rem,18vw,12rem)] font-serif font-bold leading-none"
             style={{
-              fontFamily: "'Playfair Display', serif",
-              background: 'linear-gradient(135deg, rgba(255,255,255,0.9), rgba(201,184,247,0.7))',
+              background: 'linear-gradient(135deg, #e9d5ff 0%, #a78bfa 50%, #f9a8d4 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
             }}
           >
             {count}
-          </motion.span>
-          <p className="text-xs tracking-widest text-white/20 mt-2 uppercase">
+          </p>
+          <p className="text-purple-300/60 text-xs tracking-widest uppercase font-sans mt-2">
             {count === 0 ? 'times' : count === 1 ? 'time' : 'times'}
           </p>
-        </div>
-      </Reveal>
+        </motion.div>
 
-      {/* glass button */}
-      <Reveal delay={0.2}>
-        <motion.button
+        {/* Glass button */}
+        <button
           onClick={handleClick}
-          whileHover={{ scale: 1.04 }}
-          whileTap={{ scale: 0.97 }}
-          className="relative overflow-hidden glass rounded-2xl px-12 py-5 text-sm font-light tracking-[0.3em] uppercase text-white/80 cursor-pointer select-none"
-          style={{
-            boxShadow: ripple
-              ? '0 0 0 2px rgba(201,184,247,0.5), 0 0 60px rgba(201,184,247,0.35), 0 0 120px rgba(247,168,184,0.2)'
-              : '0 0 0 1px rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.4)',
-            transition: 'box-shadow 0.4s ease',
-          }}
+          className={`glass rounded-2xl px-12 py-5 text-white font-serif text-xl cursor-pointer transition-all duration-300 hover:bg-white/10 active:scale-95 select-none ${glowing ? 'glow-pulse' : ''}`}
+          style={{ letterSpacing: '0.05em' }}
         >
-          {/* inner shine */}
-          <span
-            className="absolute inset-0 rounded-2xl"
-            style={{
-              background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 50%, rgba(255,255,255,0.03) 100%)',
-            }}
-          />
-          {/* ripple burst */}
-          {ripple && (
-            <motion.span
-              key={count}
-              initial={{ scale: 0, opacity: 0.6 }}
-              animate={{ scale: 3.5, opacity: 0 }}
-              transition={{ duration: 0.65, ease: 'easeOut' }}
-              className="absolute inset-0 rounded-2xl"
-              style={{ background: 'rgba(201,184,247,0.25)' }}
-            />
-          )}
-          <span className="relative z-10">I Miss Her</span>
-        </motion.button>
-      </Reveal>
+          I Miss Her
+        </button>
 
-      <Reveal delay={0.35}>
-        <p className="text-[11px] text-white/20 tracking-widest italic text-center"
-           style={{ fontFamily: "'Playfair Display', serif" }}>
-          {count === 0
-            ? 'press when it\'s quiet'
-            : count < 5
-            ? 'you\'re allowed to'
-            : count < 20
-            ? 'it\'s okay'
-            : count < 50
-            ? 'still here'
-            : 'breathe'}
+        <p className="text-purple-300/30 text-xs font-sans tracking-widest uppercase">
+          {count === 0 ? 'press when you feel it' : count < 5 ? 'keep going' : count < 20 ? 'it adds up' : 'every moment counted'}
         </p>
-      </Reveal>
+      </motion.div>
     </section>
   );
 }
 
-// ── Collision ─────────────────────────────────────────────────────────────────
-function Collision() {
+function CollisionSection() {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: '-80px' });
+
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center px-6 py-32 gap-16">
-      <Reveal>
-        <div className="text-center space-y-3">
-          <p className="text-xs tracking-[0.5em] uppercase text-white/25">physics of the heart</p>
+    <section
+      ref={ref}
+      className="relative min-h-screen flex flex-col items-center justify-center px-6 py-32 overflow-hidden"
+    >
+      <div className="orb w-[400px] h-[400px] bg-teal-500 top-[15%] right-[10%]" />
+      <div className="orb w-[300px] h-[300px] bg-violet-600 bottom-[20%] left-[5%]" />
+
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={inView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+        className="relative z-10 w-full max-w-2xl flex flex-col items-center gap-16"
+      >
+        <div className="text-center">
+          <p className="text-xs uppercase tracking-[0.3em] text-purple-300/50 font-sans mb-4">observation</p>
           <h2
-            className="text-[clamp(2rem,6vw,4.5rem)] font-bold leading-tight"
+            className="text-[clamp(2rem,6vw,4rem)] font-serif font-bold"
             style={{
-              fontFamily: "'Playfair Display', serif",
-              background: 'linear-gradient(135deg, #fff 0%, rgba(201,184,247,0.85) 60%, rgba(247,168,184,0.7) 100%)',
+              background: 'linear-gradient(135deg, #c4b5fd 0%, #f9a8d4 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
             }}
           >
             Moments in Collision
           </h2>
-          <p className="text-xs text-white/25 font-light tracking-wider max-w-xs mx-auto">
-            two objects — equal mass, opposite velocity — meet exactly once
+          <p className="mt-4 text-purple-300/40 text-sm font-sans tracking-wide max-w-md mx-auto leading-relaxed">
+            Two bodies. One axis. The moment before impact is where everything lives.
           </p>
         </div>
-      </Reveal>
 
-      {/* animation stage */}
-      <Reveal delay={0.2}>
-        <div className="relative w-80 h-40 flex items-center justify-center">
-          {/* shockwave */}
-          <div className="sq-shock" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />
+        {/* Animation stage */}
+        <div className="glass rounded-3xl p-12 w-full flex flex-col items-center gap-8">
+          <div className="relative flex items-center justify-center w-full h-24">
+            {/* Left square */}
+            <div
+              className="square-left absolute w-16 h-16 rounded-xl"
+              style={{ background: 'linear-gradient(135deg, #7c6af7, #a78bfa)', boxShadow: '0 0 30px rgba(124,106,247,0.4)' }}
+            />
+            {/* Impact flash */}
+            <div
+              className="impact-flash absolute w-6 h-6 rounded-full bg-white"
+              style={{ boxShadow: '0 0 20px 10px rgba(255,255,255,0.6)' }}
+            />
+            {/* Right square */}
+            <div
+              className="square-right absolute w-16 h-16 rounded-xl"
+              style={{ background: 'linear-gradient(135deg, #f9a8d4, #ec4899)', boxShadow: '0 0 30px rgba(249,168,212,0.4)' }}
+            />
+          </div>
 
-          {/* left square — warm rose */}
-          <div
-            className="collision-square sq-left absolute"
-            style={{
-              background: 'linear-gradient(135deg, #f9a8d4, #fb7185)',
-              boxShadow: '0 0 24px rgba(249,168,212,0.5)',
-              left: '50%',
-              top: '50%',
-              transform: 'translateY(-50%) translateX(-180px)',
-            }}
-          />
-
-          {/* right square — cool violet */}
-          <div
-            className="collision-square sq-right absolute"
-            style={{
-              background: 'linear-gradient(135deg, #a78bfa, #818cf8)',
-              boxShadow: '0 0 24px rgba(167,139,250,0.5)',
-              left: '50%',
-              top: '50%',
-              transform: 'translateY(-50%) translateX(116px)',
-            }}
-          />
+          <div className="flex gap-8 text-center">
+            <div>
+              <p className="text-purple-300 font-serif text-2xl font-bold">m₁</p>
+              <p className="text-purple-300/40 text-xs font-sans tracking-widest mt-1">momentum</p>
+            </div>
+            <div className="w-px bg-purple-300/20" />
+            <div>
+              <p className="text-pink-300 font-serif text-2xl font-bold">m₂</p>
+              <p className="text-pink-300/40 text-xs font-sans tracking-widest mt-1">memory</p>
+            </div>
+          </div>
         </div>
-      </Reveal>
-
-      <Reveal delay={0.4}>
-        <div className="glass rounded-xl px-8 py-5 max-w-sm text-center">
-          <p className="text-xs text-white/40 leading-relaxed tracking-wide">
-            In elastic collision, momentum is conserved — yet after impact,
-            nothing moves the same way it did before.
-          </p>
-        </div>
-      </Reveal>
+      </motion.div>
     </section>
   );
 }
 
-// ── Footer ────────────────────────────────────────────────────────────────────
-function Footer() {
+function FooterSection() {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: '-60px' });
+
   return (
-    <footer className="relative min-h-[60vh] flex flex-col items-center justify-center px-6 py-32 gap-8">
-      <Reveal>
-        <div className="text-center space-y-6">
-          <p className="text-xs tracking-[0.6em] uppercase text-white/20">a reminder</p>
-          <h2
-            className="text-[clamp(2.5rem,8vw,7rem)] font-bold leading-tight"
-            style={{
-              fontFamily: "'Playfair Display', serif",
-              background: 'linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(201,184,247,0.5) 50%, rgba(168,200,247,0.4) 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}
-          >
-            Keep Moving Right
-          </h2>
-          <p
-            className="text-xs text-white/20 font-light tracking-widest italic"
-            style={{ fontFamily: "'Playfair Display', serif" }}
-          >
-            the x-axis is your friend
-          </p>
-        </div>
-      </Reveal>
+    <section
+      ref={ref}
+      className="relative min-h-[60vh] flex flex-col items-center justify-center px-6 py-32 overflow-hidden"
+    >
+      <div className="orb w-[600px] h-[600px] bg-purple-700 top-[-200px] left-[-100px]" />
+      <div className="orb w-[400px] h-[400px] bg-pink-500 bottom-[-100px] right-[-50px]" />
 
-      <Reveal delay={0.2}>
-        <div className="w-px h-16 bg-gradient-to-b from-white/20 to-transparent mx-auto mt-8" />
-      </Reveal>
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        animate={inView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+        className="relative z-10 text-center"
+      >
+        <motion.p
+          initial={{ opacity: 0, letterSpacing: '0.8em' }}
+          animate={inView ? { opacity: 0.3, letterSpacing: '0.35em' } : {}}
+          transition={{ duration: 1.8, delay: 0.3, ease: 'easeOut' }}
+          className="text-xs uppercase text-purple-300 font-sans mb-8 tracking-[0.35em]"
+        >
+          always
+        </motion.p>
 
-      <Reveal delay={0.3}>
-        <p className="text-[10px] tracking-[0.4em] uppercase text-white/15">
-          silent-mode-counter &nbsp;&mdash;&nbsp; {new Date().getFullYear()}
-        </p>
-      </Reveal>
-    </footer>
+        <h2
+          className="text-[clamp(2.5rem,8vw,6rem)] font-serif font-bold leading-tight"
+          style={{
+            background: 'linear-gradient(135deg, #ffffff 0%, #c4b5fd 40%, #f9a8d4 80%, #ffffff 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}
+        >
+          Keep Moving
+          <br />
+          Right
+        </h2>
+
+        <motion.div
+          initial={{ scaleX: 0, opacity: 0 }}
+          animate={inView ? { scaleX: 1, opacity: 0.2 } : {}}
+          transition={{ duration: 1.4, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="h-px bg-gradient-to-r from-transparent via-purple-300 to-transparent mt-10 w-48 mx-auto"
+        />
+
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={inView ? { opacity: 0.25 } : {}}
+          transition={{ duration: 1, delay: 1 }}
+          className="mt-8 text-xs text-purple-300 font-sans tracking-widest uppercase"
+        >
+          silent mode &mdash; {new Date().getFullYear()}
+        </motion.p>
+      </motion.div>
+    </section>
   );
 }
 
-// ── Page ──────────────────────────────────────────────────────────────────────
 export default function Home() {
   return (
-    <main className="relative bg-[#03071e] min-h-screen">
-      <AtmosphericBg />
-      <Hero />
-      <Counter />
-      <Collision />
-      <Footer />
+    <main className="relative">
+      <HeroSection />
+      <CounterSection />
+      <CollisionSection />
+      <FooterSection />
     </main>
   );
 }
