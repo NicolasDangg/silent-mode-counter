@@ -3,7 +3,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Silent Mode',
-  description: 'A moment of stillness.',
+  description: 'A melancholic counter for the things you miss.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
