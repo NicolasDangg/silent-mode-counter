@@ -1,7 +1,28 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { motion, useScroll, useTransform, useInView, AnimatePresence } from 'framer-motion';
+
+// ─────────────────────────────────────────────
+// MILESTONES / EASTER EGGS
+// ─────────────────────────────────────────────
+const MILESTONES: Record<number, string> = {
+  1:   'there it is.',
+  5:   'counting already.',
+  10:  'ten times. wow.',
+  25:  'this is becoming a habit.',
+  50:  'fifty. she must be something.',
+  69:  'nice.',
+  100: 'do u really miss her that much huh',
+  200: 'okay okay we get it.',
+  365: "a whole year's worth of missing her.",
+  500: 'bro.',
+  1000: 'at this point just text her.',
+};
+
+function getMilestone(count: number): string | null {
+  return MILESTONES[count] ?? null;
+}
 
 // ─────────────────────────────────────────────
 // HERO
@@ -22,8 +43,11 @@ function HeroSection() {
       <div className="orb w-[450px] h-[450px] bg-pink-500 bottom-[-80px] right-[-120px]" />
       <div className="orb w-[320px] h-[320px] bg-indigo-600 top-[35%] left-[55%]" />
 
-      {/* Fine grain overlay */}
+      {/* Fine grain texture */}
       <div className="absolute inset-0 opacity-[0.03] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScyMDAnIGhlaWdodD0nMjAwJz48ZmlsdGVyIGlkPSduJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC45JyBudW1PY3RhdmVzPSc0JyBzdGl0Y2hUaWxlcz0nc3RpdGNoJy8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9JzEwMCUnIGhlaWdodD0nMTAwJScgZmlsdGVyPSd1cmwoI24pJy8+PC9zdmc+')]" />
+
+      {/* Dark contrast overlay for readability */}
+      <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/50 via-black/20 to-black/55 pointer-events-none" />
 
       {/* Parallax content */}
       <motion.div style={{ y, opacity }} className="relative z-10 text-center px-6">
@@ -32,6 +56,7 @@ function HeroSection() {
           animate={{ opacity: 0.35, letterSpacing: '0.38em' }}
           transition={{ duration: 2, ease: 'easeOut' }}
           className="text-xs uppercase text-purple-300 mb-6 font-sans tracking-[0.38em]"
+          style={{ textShadow: '0 1px 12px rgba(0,0,0,0.7)' }}
         >
           an experience
         </motion.p>
@@ -45,6 +70,8 @@ function HeroSection() {
             background: 'linear-gradient(140deg, #ffffff 0%, #c4b5fd 45%, #f9a8d4 90%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
+            // Subtle drop shadow for depth and readability
+            filter: 'drop-shadow(0 3px 28px rgba(0,0,0,0.65)) drop-shadow(0 1px 8px rgba(0,0,0,0.5))',
           }}
         >
           Silent
@@ -64,6 +91,7 @@ function HeroSection() {
           animate={{ opacity: 0.4, y: 0 }}
           transition={{ duration: 1.2, delay: 1.5, ease: 'easeOut' }}
           className="mt-6 text-xs text-purple-200 font-sans tracking-widest uppercase"
+          style={{ textShadow: '0 1px 10px rgba(0,0,0,0.8)' }}
         >
           scroll to feel
         </motion.p>
@@ -92,14 +120,16 @@ function HeroSection() {
 // COUNTER
 // ─────────────────────────────────────────────
 function CounterSection() {
-  const [count, setCount]   = useState(0);
+  const [count, setCount]     = useState(0);
   const [glowing, setGlowing] = useState(false);
   const [ripple, setRipple]   = useState(false);
+  const [milestone, setMilestone] = useState<string | null>(null);
   const ref    = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-100px' });
 
   const handleClick = useCallback(() => {
-    setCount((c) => c + 1);
+    const next = count + 1;
+    setCount(next);
     setGlowing(false);
     setRipple(false);
     requestAnimationFrame(() =>
@@ -109,11 +139,17 @@ function CounterSection() {
       })
     );
     setTimeout(() => { setGlowing(false); setRipple(false); }, 800);
-  }, []);
+
+    const hit = getMilestone(next);
+    if (hit) {
+      setMilestone(hit);
+      setTimeout(() => setMilestone(null), 3400);
+    }
+  }, [count]);
 
   const subtext =
     count === 0  ? 'press when you feel it' :
-    count < 5    ? 'it\'s okay' :
+    count < 5    ? "it's okay" :
     count < 15   ? 'it adds up' :
     count < 40   ? 'every one counted' :
                    'she was worth it';
@@ -121,7 +157,7 @@ function CounterSection() {
   return (
     <section
       ref={ref}
-      className="relative min-h-screen flex flex-col items-center justify-center px-6 py-32 overflow-hidden"
+      className="relative min-h-screen flex flex-col items-center justify-center px-6 py-40 overflow-hidden"
     >
       <div className="orb w-[550px] h-[550px] bg-indigo-700 top-[15%] left-[5%]" />
       <div className="orb w-[380px] h-[380px] bg-rose-500 bottom-[8%] right-[2%]" />
@@ -130,9 +166,9 @@ function CounterSection() {
         initial={{ opacity: 0, y: 70 }}
         animate={inView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 1.3, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 flex flex-col items-center gap-10"
+        className="relative z-10 flex flex-col items-center gap-16"
       >
-        {/* Counter number */}
+        {/* Counter number — DM Sans, light weight, tight tracking */}
         <AnimatePresence mode="wait">
           <motion.div
             key={count}
@@ -143,49 +179,71 @@ function CounterSection() {
             className="text-center"
           >
             <p
-              className="text-[clamp(6rem,20vw,13rem)] font-serif font-bold leading-none select-none"
+              className="font-sans font-light leading-none select-none"
               style={{
+                fontSize: 'clamp(6rem, 20vw, 14rem)',
+                letterSpacing: '-0.045em',
                 background: 'linear-gradient(135deg, #ede9fe 0%, #a78bfa 45%, #f9a8d4 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
+                filter: 'drop-shadow(0 4px 28px rgba(124,106,247,0.3))',
               }}
             >
               {count}
             </p>
-            <p className="text-purple-300/50 text-xs tracking-widest uppercase font-sans mt-1">
+            <p className="text-purple-300/50 text-xs tracking-[0.28em] uppercase font-sans mt-3">
               {count === 1 ? 'time' : 'times'}
             </p>
           </motion.div>
         </AnimatePresence>
 
-        {/* Button with ripple */}
+        {/* Milestone easter egg */}
+        <div className="h-7 flex items-center justify-center">
+          <AnimatePresence>
+            {milestone && (
+              <motion.p
+                key={milestone}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
+                className="text-purple-300/65 text-sm font-serif italic tracking-wide"
+              >
+                {milestone}
+              </motion.p>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Button — Cormorant italic, generous padding */}
         <div className="relative">
-          {/* Ripple ring */}
           {ripple && (
-            <span
-              className="ring-ripple absolute inset-0 rounded-2xl border-2 border-purple-400/60 pointer-events-none"
-            />
+            <span className="ring-ripple absolute inset-0 rounded-2xl border-2 border-purple-400/60 pointer-events-none" />
           )}
           <button
             onClick={handleClick}
             className={[
-              'glass-strong rounded-2xl px-14 py-5 text-white font-serif text-xl cursor-pointer',
+              'glass-strong rounded-2xl px-16 py-6 text-white font-serif italic cursor-pointer',
               'transition-all duration-200 hover:bg-white/10 hover:border-white/20',
               'active:scale-[0.96] select-none relative z-10',
               glowing ? 'glow-pulse' : '',
             ].join(' ')}
-            style={{ letterSpacing: '0.06em' }}
+            style={{
+              fontSize: 'clamp(1.15rem, 2.5vw, 1.45rem)',
+              letterSpacing: '0.07em',
+            }}
           >
             I Miss Her
           </button>
         </div>
 
+        {/* Sub-label */}
         <motion.p
           key={subtext}
           initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 0.3, y: 0 }}
+          animate={{ opacity: 0.28, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-purple-300 text-xs font-sans tracking-widest uppercase"
+          className="text-purple-300 text-xs font-sans tracking-[0.28em] uppercase"
         >
           {subtext}
         </motion.p>
@@ -235,39 +293,25 @@ function CollisionSection() {
 
         {/* Animation stage */}
         <div className="glass rounded-3xl p-12 w-full flex flex-col items-center gap-10">
-          {/* Squares */}
           <div className="relative flex items-center justify-center w-full h-24">
-            {/* Shockwave */}
             <div
               className="shockwave absolute h-16 w-32 rounded-full"
-              style={{
-                background: 'radial-gradient(ellipse, rgba(255,255,255,0.3) 0%, transparent 70%)',
-              }}
+              style={{ background: 'radial-gradient(ellipse, rgba(255,255,255,0.3) 0%, transparent 70%)' }}
             />
-            {/* Left square */}
             <div
               className="square-left absolute w-16 h-16 rounded-xl"
-              style={{
-                background: 'linear-gradient(135deg, #6d5af0, #a78bfa)',
-                boxShadow: '0 0 35px rgba(109,90,240,0.45)',
-              }}
+              style={{ background: 'linear-gradient(135deg, #6d5af0, #a78bfa)', boxShadow: '0 0 35px rgba(109,90,240,0.45)' }}
             />
-            {/* Impact flash */}
             <div
               className="impact-flash absolute w-5 h-5 rounded-full bg-white"
               style={{ boxShadow: '0 0 24px 12px rgba(255,255,255,0.7)' }}
             />
-            {/* Right square */}
             <div
               className="square-right absolute w-16 h-16 rounded-xl"
-              style={{
-                background: 'linear-gradient(135deg, #f9a8d4, #e879a0)',
-                boxShadow: '0 0 35px rgba(232,121,160,0.45)',
-              }}
+              style={{ background: 'linear-gradient(135deg, #f9a8d4, #e879a0)', boxShadow: '0 0 35px rgba(232,121,160,0.45)' }}
             />
           </div>
 
-          {/* Labels */}
           <div className="flex items-center gap-10 text-center">
             <div>
               <p className="text-purple-300 font-serif text-2xl font-bold">m₁</p>
@@ -280,10 +324,7 @@ function CollisionSection() {
             </div>
           </div>
 
-          {/* Equation */}
-          <p
-            className="text-xs font-sans tracking-[0.25em] text-purple-300/25 uppercase"
-          >
+          <p className="text-xs font-sans tracking-[0.25em] text-purple-300/25 uppercase">
             m₁v₁ + m₂v₂ = constant
           </p>
         </div>
@@ -328,6 +369,7 @@ function FooterSection() {
             background: 'linear-gradient(140deg, #ffffff 0%, #c4b5fd 35%, #f9a8d4 75%, #ffffff 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
+            filter: 'drop-shadow(0 2px 18px rgba(0,0,0,0.45))',
           }}
         >
           Keep Moving

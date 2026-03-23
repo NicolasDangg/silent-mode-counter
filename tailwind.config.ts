@@ -9,8 +9,10 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        serif: ['Georgia', 'Cambria', '"Times New Roman"', 'serif'],
-        sans: ['"SF Pro Display"', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+        // Counter numbers & UI labels — high-end geometric sans, tight tracking
+        sans: ['var(--font-dm-sans)', '"SF Pro Display"', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+        // Headings, button, editorial text — elegant old-style serif
+        serif: ['var(--font-cormorant)', 'Georgia', 'Cambria', '"Times New Roman"', 'serif'],
       },
       colors: {
         navy: {
